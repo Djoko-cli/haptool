@@ -1,0 +1,27 @@
+# Binaire
+/haptool
+/bin/
+
+# Clés et configurations : jamais dans le dépôt (go2rtc.yaml compris)
+*.yaml
+*.yml
+*.key
+*.pem
+.env
+.env.*
+
+# Dumps bruts et journaux
+dumps/
+*.dump
+*.dump.json
+*.raw.json
+*.log
+
+# macOS
+.DS_Store
+
+# Documents de mission locaux, non publiés
+BRIEF*.md
+
+# Versions détaillées, locales
+*.prive.md

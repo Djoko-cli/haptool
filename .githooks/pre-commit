@@ -1,0 +1,31 @@
+#!/bin/sh
+# Refuse tout commit dont les lignes ajoutées ressemblent à une fuite
+# de clé d'appairage HomeKit, ou qui publie une IP privée ou une MAC
+# réelle. Activation : git config core.hooksPath .githooks
+set -u
+
+added=$(git diff --cached -U0 --no-color --diff-filter=ACMR | grep -E '^\+' | grep -vE '^\+\+\+ ')
+
+fail=0
+check() { # $1 : expression régulière étendue, $2 : message
+	if printf '%s\n' "$added" | grep -Eq -- "$1"; then
+		echo "pre-commit : $2" >&2
+		fail=1
+	fi
+}
+
+check '(client_private|device_public)=[0-9a-fA-F]{16}' 'clé hexadécimale après client_private= ou device_public='
+check 'client_id=[0-9A-Za-z][0-9A-Za-z:-]{7}' 'identifiant après client_id='
+check 'homekit://[0-9.]+:[0-9]+\?[^<]' 'URL homekit:// non expurgée'
+check '[0-9a-fA-F]{64}' 'suite hexadécimale de 64 caractères ou plus'
+check '(^|[^0-9.])(10\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\.[0-9]{1,3}\.[0-9]{1,3}' 'adresse IP privée (remplacer par 192.0.2.x)'
+macs=$(printf '%s\n' "$added" | grep -viE '02:00:00:|AA:BB:CC:')
+if printf '%s\n' "$macs" | grep -Eq '([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}'; then
+	echo "pre-commit : adresse MAC ou device_id réel (remplacer par 02:00:00:…)" >&2
+	fail=1
+fi
+
+if [ "$fail" -ne 0 ]; then
+	echo "Commit refusé. Relis le diff : git diff --cached" >&2
+	exit 1
+fi
