@@ -21,7 +21,7 @@ Version publique et condensée. Le journal détaillé reste chez le propriétair
 
 - **Symptôme mesuré** : une caméra n'émet que du silence, des trames Opus de 6 octets, alors que l'autre capte le son.
 - **Aucun réglage HomeKit ne distingue les deux caméras** : Mute (`11A`), Volume (`119`), formats audio (`115`), enregistrement (`204`, `226`), firmware.
-- **Conclusion** : les causes logicielles visibles en HAP sont exclues, ce qui oriente vers le matériel. L'étape 5, la correction du micro, est donc sans objet.
+- **Conclusion du moment** : les causes logicielles visibles en HAP sont exclues, ce qui oriente vers le matériel. Cette conclusion s'est révélée inexacte : voir la mise à jour du 2026-10-07.
 
 ## Étape 4 : voyant
 
@@ -37,3 +37,9 @@ Version publique et condensée. Le journal détaillé reste chez le propriétair
 - Toutes les étapes sont faites ; la 5 est sans objet.
 - Deux relectures sécurité par Opus, une par phase, puis une relecture finale avant publication. Tous les points relevés sont corrigés et testés.
 - Les constats qui concernent le pipeline (adresses, coupures de flux) ont été transmis à son responsable.
+
+## Mise à jour du 2026-10-07
+
+- **Micro.** La conclusion « piste matérielle » était inexacte. Le sous-système audio du firmware s'était figé ; un redémarrage électrique l'a rétabli. Aucun réglage HAP n'était en cause. Leçon : redémarrer avant de conclure à une panne matérielle.
+- **Audio vers le haut-parleur.** Il est rendu possible par un correctif de go2rtc (AlexxIT/go2rtc#2551), sans écriture HAP : la parole passe par la session de streaming déjà négociée.
+- **Horodatage audio.** Corrigé dans go2rtc (AlexxIT/go2rtc#2550). La caméra envoie de l'Opus à 8 kHz, en trames de 20 ms.
