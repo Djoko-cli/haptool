@@ -36,7 +36,7 @@ Documents (in French):
 
 ### Getting started
 
-First enable the anti-leak hook, once per clone. It refuses keys, private IP addresses and real MAC addresses in commits:
+First enable the anti-leak hooks, once per clone. The pre-commit hook refuses keys, private IP addresses and real MAC addresses; the pre-push guard also checks the noreply author and refuses any identifier listed in `.githooks/identifiants-reels.local` (local file, ignored by git, one value per line; the push is refused while it is missing):
 
 ```sh
 git config core.hooksPath .githooks
@@ -149,7 +149,7 @@ Documents :
 
 ### Mise en route
 
-Active d'abord le hook anti-fuite, une fois par clone. Il refuse les clés, les IP privées et les adresses MAC réelles dans les commits :
+Active d'abord les gardes anti-fuite, une fois par clone. Le hook pre-commit refuse les clés, les IP privées et les adresses MAC réelles ; le garde pre-push vérifie aussi l'auteur noreply et refuse tout identifiant listé dans `.githooks/identifiants-reels.local` (fichier local, ignoré par git, une valeur par ligne ; tant qu'il manque, le push est refusé) :
 
 ```sh
 git config core.hooksPath .githooks

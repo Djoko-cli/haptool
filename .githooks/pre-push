@@ -1,0 +1,30 @@
+#!/bin/bash
+# Garde avant publication (dépôt public). Refuse le push si un commit poussé :
+#   - a un auteur ou un committer autre que l'adresse noreply de GitHub ;
+#   - ajoute une IP privée, une adresse MAC réelle, ou l'un des identifiants
+#     réels listés dans .githooks/identifiants-reels.local (fichier local,
+#     ignoré par git : une valeur par ligne, comparée sans casse).
+# Ne jamais contourner (pas de --no-verify). Modèle : garde de maillage-thread.
+attendu="12185352+Djoko-cli@users.noreply.github.com"
+liste="$(git rev-parse --show-toplevel)/.githooks/identifiants-reels.local"
+zero=0000000000000000000000000000000000000000
+fautifs=0
+signale() { echo "pre-push : commit $(git log -1 --format=%h "$1") : $2" >&2; fautifs=$((fautifs + 1)); }
+[ -s "$liste" ] || { echo "pre-push : liste locale des identifiants réels absente ($liste) : push refusé" >&2; exit 1; }
+while read -r ref_locale sha_local ref_distante sha_distant; do
+  [ "$sha_local" = "$zero" ] && continue   # suppression d'une branche
+  if [ "$sha_distant" = "$zero" ] || ! git cat-file -e "$sha_distant" 2>/dev/null; then
+    plage=$(git rev-list "$sha_local" --not --remotes)
+  else
+    plage=$(git rev-list "$sha_distant..$sha_local")
+  fi
+  for c in $plage; do
+    ae=$(git log -1 --format=%ae "$c"); ce=$(git log -1 --format=%ce "$c")
+    [ "$ae" = "$attendu" ] && [ "$ce" = "$attendu" ] || signale "$c" "auteur ou committer hors noreply"
+    ajouts=$(git diff-tree -p -r --root --no-commit-id --no-color "$c" | grep -E '^\+' | grep -vE '^\+\+\+ ')
+    printf '%s\n' "$ajouts" | grep -Eq '(^|[^0-9.])(10\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\.[0-9]{1,3}\.[0-9]{1,3}' && signale "$c" "adresse IP privée"
+    printf '%s\n' "$ajouts" | grep -viE '02:00:00:|AA:BB:CC:' | grep -Eq '([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}' && signale "$c" "adresse MAC réelle"
+    { printf '%s\n' "$ajouts"; git log -1 --format=%B "$c"; } | grep -qiF -f "$liste" && signale "$c" "identifiant réel de la liste locale"
+  done
+done
+[ "$fautifs" -eq 0 ] || { echo "pre-push : push refusé ($fautifs problème(s))." >&2; exit 1; }

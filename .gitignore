@@ -25,3 +25,6 @@ BRIEF*.md
 
 # Versions détaillées, locales
 *.prive.md
+
+# Identifiants réels pour le garde pre-push, locaux
+*.local
