@@ -24,7 +24,8 @@ const Sample = `{"accessories":[{"aid":1,"services":[
 {"iid":64,"type":"21A","linked":[32],"characteristics":[
   {"iid":66,"type":"21B","perms":["pr","pw","ev"],"format":"bool","value":true},
  {"iid":67,"type":"11B","perms":["pr","pw","ev","tw"],"format":"bool","value":true},
- {"iid":68,"type":"21D","perms":["pr","pw","ev"],"format":"uint8","value":0,"minValue":0,"maxValue":1,"minStep":1}]},
+ {"iid":68,"type":"21D","perms":["pr","pw","ev"],"format":"uint8","value":0,"minValue":0,"maxValue":1,"minStep":1},
+ {"iid":69,"type":"11B","perms":["pr","pw","ev"],"format":"bool","value":1,"description":"Night Vision LED"}]},
 {"iid":80,"type":"8C6E0A3D-1A2B-4C5D-8E9F-0A1B2C3D4E5F","hidden":true,"characteristics":[
  {"iid":81,"type":"8C6E0A3E-1A2B-4C5D-8E9F-0A1B2C3D4E5F","perms":["pr"],"format":"data","value":"AAEC","x-vendor":"z"}]}
 ]}]}`

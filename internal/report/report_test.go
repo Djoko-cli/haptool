@@ -100,10 +100,10 @@ func TestDiff(t *testing.T) {
 	b := report.Camera{Name: "cam2", Accessories: sample(t)}
 	// b : micro coupé, firmware différent, Volume en lecture seule, voyant absent.
 	svc := b.Accessories[0].Services
-	svc[0].Characteristics[5].Value = json.RawMessage(`"5.1.0"`) // 52
-	svc[3].Characteristics[0].Value = json.RawMessage(`true`)    // 11A
-	svc[3].Characteristics[1].Perms = []string{"pr", "ev"}       // 119
-	svc[4].Characteristics = svc[4].Characteristics[:2]          // 21D (dernière) retirée
+	svc[0].Characteristics[5].Value = json.RawMessage(`"5.1.0"`)                                 // 52
+	svc[3].Characteristics[0].Value = json.RawMessage(`true`)                                    // 11A
+	svc[3].Characteristics[1].Perms = []string{"pr", "ev"}                                       // 119
+	svc[4].Characteristics = append(svc[4].Characteristics[:2:2], svc[4].Characteristics[3:]...) // 21D retirée
 
 	got := report.Diff(a, b)
 

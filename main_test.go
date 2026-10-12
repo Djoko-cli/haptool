@@ -435,3 +435,30 @@ func TestConfigComesFromFlagOrEnvironment(t *testing.T) {
 		t.Errorf("avec HAPTOOL_CONFIG : code %d, stderr %q", code, errb.String())
 	}
 }
+
+// Défaut attrapé : la caméra renvoie un booléen sous forme de nombre (1)
+// alors que l'outil écrit true ou false ; la commande pour écrire et le
+// retour arrière doivent employer 0 ou 1, sans quoi --expect ne
+// correspondrait plus à la valeur relue.
+func TestSetBoolUsesZeroOneOnCommandLine(t *testing.T) {
+	b := newBench(t)
+
+	_, out, _ := b.exec(t, "set", "cam1", "1.69", "0")
+	for _, want := range []string{
+		"pour écrire : haptool set --confirm --expect 11B:1 cam1 1.69 0",
+		"retour arrière : haptool set --confirm --expect 11B:0 cam1 1.69 1",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("sortie sans %q :\n%s", want, out)
+		}
+	}
+
+	code, out, errOut := b.exec(t, "set", "--confirm", "--expect", "11B:1", "cam1", "1.69", "0")
+	if code != 0 {
+		t.Fatalf("écriture : code %d\n%s%s", code, out, errOut)
+	}
+	code, out, errOut = b.exec(t, "set", "--confirm", "--expect", "11B:0", "cam1", "1.69", "1")
+	if code != 0 {
+		t.Errorf("retour arrière refusé : code %d\n%s%s", code, out, errOut)
+	}
+}

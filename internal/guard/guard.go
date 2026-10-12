@@ -1,10 +1,11 @@
 // Package guard décide si une écriture est permise et encode sa valeur.
 //
 // Politique (frontière de sécurité, docs/CONCEPTION.md) :
-//   - liste blanche : seule la caractéristique du voyant (21D, Camera
-//     Operating Mode Indicator) est inscriptible ; toute autre, comme 21B
-//     (HomeKit Camera Active, qui couperait le flux de go2rtc) ou 11A
-//     (Mute), demande une décision du propriétaire et un ajout ici ;
+//   - liste blanche : seuls le voyant (21D) et la vision nocturne (11B),
+//     dans le service Camera Operating Mode (21A), sont inscriptibles.
+//     Toute autre caractéristique, comme 21B (HomeKit Camera Active, qui
+//     couperait le flux de go2rtc) ou 11A (Mute), demande une décision du
+//     propriétaire et un ajout ici ;
 //   - jamais le service de streaming de go2rtc (110), ni 117, 118 ou 131,
 //     où qu'ils soient ;
 //   - jamais un type de fabricant, service ou caractéristique : impossible
@@ -37,9 +38,11 @@ var forbiddenTypes = map[string]string{
 	"131": "Setup Data Stream Transport",
 }
 
-// writable est la liste blanche des types inscriptibles.
-var writable = map[string]string{
-	"21D": "Camera Operating Mode Indicator, le voyant d'état",
+// writable est la liste blanche : type inscriptible → service qui doit le
+// porter. Chaque entrée est une décision du propriétaire.
+var writable = map[string]struct{ service, name string }{
+	"21D": {"21A", "Camera Operating Mode Indicator, le voyant d'état"},
+	"11B": {"21A", "Night Vision, la vision nocturne"},
 }
 
 // intRange donne les bornes des formats entiers de HAP.
@@ -64,8 +67,12 @@ func Value(s hapc.Service, c hapc.Characteristic, input string) (json.RawMessage
 	if !catalog.IsApple(s.Type) || !catalog.IsApple(c.Type) {
 		return nil, fmt.Errorf("écriture interdite : type de fabricant, non identifiable")
 	}
-	if _, ok := writable[ct]; !ok {
-		return nil, fmt.Errorf("écriture interdite : %s n'est pas dans la liste blanche (voyant 21D seulement)", ct)
+	w, ok := writable[ct]
+	if !ok {
+		return nil, fmt.Errorf("écriture interdite : %s n'est pas dans la liste blanche (21D voyant, 11B vision nocturne)", ct)
+	}
+	if st != w.service {
+		return nil, fmt.Errorf("écriture interdite : %s attendu dans le service %s, trouvé dans %s", ct, w.service, st)
 	}
 	perms := make([]string, len(c.Perms))
 	for i, p := range c.Perms {

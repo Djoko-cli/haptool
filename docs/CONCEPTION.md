@@ -74,7 +74,7 @@ Défauts lus dans `pkg/hap` v1.9.14, et parades :
 
    Le masquage s'applique dans tous les rendus.
 8. **Écritures** (`internal/guard`, commande `set`).
-   - *Liste blanche*, réduite au voyant `21D`. Tout autre type, comme `21B` (HomeKit Camera Active, qui couperait le flux de go2rtc) ou `11A` (Mute), demande une décision du propriétaire.
+   - *Liste blanche*, chaque type lié au service qui doit le porter : le voyant `21D` et la vision nocturne `11B`, dans `21A`. Tout autre type, comme `21B` (HomeKit Camera Active, qui couperait le flux de go2rtc) ou `11A` (Mute), demande une décision du propriétaire.
    - *Toujours refusés* :
      - le service `110` et les types `117`, `118` et `131` ;
      - les types de fabricant et les formats opaques ;

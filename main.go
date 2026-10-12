@@ -303,12 +303,12 @@ func set(ctx context.Context, e env, config string, opts hapc.Options, args []st
 		fmt.Fprintln(e.stdout, "la caractéristique a déjà cette valeur : rien à écrire")
 		return 0
 	}
-	cur, curOK := cliValue(current.Value)
+	cur, curOK := cliValue(c.Format, current.Value)
 	if !curOK {
 		fmt.Fprintln(e.stderr, "valeur actuelle non représentable en ligne de commande : écriture refusée")
 		return 2
 	}
-	newV, _ := cliValue(value)
+	newV, _ := cliValue(c.Format, value)
 	rollback := fmt.Sprintf("haptool set --confirm --expect %s:%s %s %s %s", typ, newV, cam.Name, id, cur)
 	wanted := typ + ":" + cur
 	fmt.Fprintf(e.stdout, "pour écrire : haptool set --confirm --expect %s %s %s %s\n", wanted, cam.Name, id, newV)
@@ -423,12 +423,22 @@ func same(format string, a, b json.RawMessage) bool {
 }
 
 // cliValue rend une valeur JSON telle qu'on la repasserait à set, sûre à
-// coller dans un shell : nombre ou booléen tel quel, chaîne entre
+// coller dans un shell : un booléen en 0 ou 1, quelle que soit la forme que
+// la caméra renvoie (true ou 1) ; un nombre tel quel ; une chaîne entre
 // guillemets simples POSIX. Faux si la valeur est nulle ou porte un
 // caractère de contrôle.
-func cliValue(v json.RawMessage) (string, bool) {
+func cliValue(format string, v json.RawMessage) (string, bool) {
 	var x any
 	if json.Unmarshal(v, &x) != nil || x == nil {
+		return "", false
+	}
+	if format == "bool" {
+		switch x {
+		case true, 1.0:
+			return "1", true
+		case false, 0.0:
+			return "0", true
+		}
 		return "", false
 	}
 	str, isStr := x.(string)

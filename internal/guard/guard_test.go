@@ -59,6 +59,7 @@ func TestRefusedTargets(t *testing.T) {
 		{"21B HomeKit Camera Active", svc("21A"), ch("21B", "uint8", rw, "min", "0", "max", "1")},
 		{"11A Mute", svc("112"), ch("11A", "bool", rw)},
 		{"pw en majuscules mais TW", svc("21A"), ch("21D", "uint8", []string{"pr", "pw", "TW"})},
+		{"11B sans pw", svc("21A"), ch("11B", "bool", []string{"pr", "ev"})},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -124,5 +125,27 @@ func TestOnlyStatusLightIsWritable(t *testing.T) {
 	got, err := guard.Value(svc("21A"), ch("0000021d-0000-1000-8000-0026bb765291", "uint8", rw, "min", "0", "max", "1"), "1")
 	if err != nil || string(got) != "1" {
 		t.Errorf("21D refusé : %s, %v", got, err)
+	}
+}
+
+// Défaut attrapé : Night Vision (11B), ajouté à la liste blanche à la
+// demande du propriétaire, serait refusé dans son service (21A), ou
+// accepté hors de lui ou avec une écriture temporisée.
+func TestNightVisionWritableOnlyInOperatingMode(t *testing.T) {
+	nv := ch("11B", "bool", rw)
+	if got, err := guard.Value(svc("21A"), nv, "0"); err != nil || string(got) != "false" {
+		t.Errorf("11B dans 21A refusé : %s, %v", got, err)
+	}
+	for name, tt := range map[string]struct {
+		s hapc.Service
+		c hapc.Characteristic
+	}{
+		"autre service": {svc("110"), nv},
+		"service 112":   {svc("112"), nv},
+		"tw":            {svc("21A"), ch("11B", "bool", []string{"pr", "pw", "ev", "tw"})},
+	} {
+		if v, err := guard.Value(tt.s, tt.c, "0"); err == nil {
+			t.Errorf("%s : écriture acceptée : %s", name, v)
+		}
 	}
 }

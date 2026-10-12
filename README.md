@@ -7,7 +7,7 @@
 A small command-line tool. It talks HomeKit (HAP) directly to Logitech Circle View cameras paired with go2rtc, using go2rtc's own pairing keys. It is used to:
 
 - read the inventory of their services and characteristics (`dump`, `get`);
-- turn their status light on or off (`set`).
+- turn their status light and night vision on or off (`set`).
 
 Documents (in French):
 
@@ -24,7 +24,7 @@ Documents (in French):
   - `GET /accessories` and `GET /characteristics`;
   - `PUT /characteristics`, with no query string.
 - **Never touched:** `/pair-setup`, `/pairings` and `/resource`.
-- **Writes are restricted** to the status light (`21D`, Camera Operating Mode Indicator). Writes are always refused for:
+- **Writes are restricted** to the status light (`21D`, Camera Operating Mode Indicator) and night vision (`11B`), both in the Camera Operating Mode service (`21A`). Writes are always refused for:
   - the streaming service of go2rtc (`110`, `117`, `118`);
   - vendor types and opaque values;
   - timed writes.
@@ -120,7 +120,7 @@ Details are in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 Petit outil en ligne de commande. Il parle HomeKit (HAP) directement à des caméras Logitech Circle View appairées à go2rtc, avec les clés d'appairage de go2rtc. Il sert à :
 
 - lire l'inventaire de leurs services et caractéristiques (`dump`, `get`) ;
-- allumer ou éteindre leur voyant d'état (`set`).
+- allumer ou éteindre leur voyant d'état et leur vision nocturne (`set`).
 
 Documents :
 
@@ -137,7 +137,7 @@ Documents :
   - `GET /accessories` et `GET /characteristics` ;
   - `PUT /characteristics`, sans paramètre.
 - **Jamais touchés :** `/pair-setup`, `/pairings` et `/resource`.
-- **Les écritures sont limitées** au voyant (`21D`, Camera Operating Mode Indicator). Elles sont toujours refusées pour :
+- **Les écritures sont limitées** au voyant (`21D`, Camera Operating Mode Indicator) et à la vision nocturne (`11B`), tous deux dans le service Camera Operating Mode (`21A`). Elles sont toujours refusées pour :
   - le service de streaming de go2rtc (`110`, `117`, `118`) ;
   - les types de fabricant et les valeurs opaques ;
   - les écritures temporisées.
