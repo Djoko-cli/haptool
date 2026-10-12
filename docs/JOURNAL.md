@@ -43,3 +43,12 @@ Version publique et condensée. Le journal détaillé reste chez le propriétair
 - **Micro.** La conclusion « piste matérielle » était inexacte. Le sous-système audio du firmware s'était figé ; un redémarrage électrique l'a rétabli. Aucun réglage HAP n'était en cause. Leçon : redémarrer avant de conclure à une panne matérielle.
 - **Audio vers le haut-parleur.** Il est rendu possible par un correctif de go2rtc (AlexxIT/go2rtc#2551), sans écriture HAP : la parole passe par la session de streaming déjà négociée.
 - **Horodatage audio.** Corrigé dans go2rtc (AlexxIT/go2rtc#2550). La caméra envoie de l'Opus à 8 kHz, en trames de 20 ms.
+
+## Mise à jour du 2026-10-13 : vision nocturne
+
+- **Night Vision (`11B`) devient inscriptible** à la demande du propriétaire. La liste blanche lie désormais chaque type au service qui le porte : `21D` et `11B`, tous deux dans `21A`. L'ajout a été relu, et vérifié en cassant exprès chaque contrôle pour voir un test échouer.
+- **Défaut corrigé au passage** : la caméra renvoie ses booléens sous forme de nombre (`1`), alors que l'outil écrit `true`. La ligne de commande emploie désormais `0` ou `1` ; sans cela, le retour arrière affiché aurait été refusé.
+- **Essai de nuit sur une caméra** (`11B` de 1 à 0, puis retour à 1 ; HTTP 204 et relecture conforme à chaque fois, flux de go2rtc intact) :
+  - les diodes infrarouges s'éteignent ;
+  - l'image reste en noir et blanc dans le noir, et repasse en couleur quand on allume la lumière.
+- **Conclusion** : `11B` (« Night Vision LED ») ne commande que l'éclairage infrarouge. Le passage entre couleur et noir et blanc est automatique, réglé par la luminosité, et aucune caractéristique HAP ne le commande.
